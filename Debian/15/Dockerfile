@@ -28,6 +28,17 @@ LABEL org.opencontainers.image.description="This Docker image contains PostgreSQ
 
 COPY requirements.txt /
 
+# Install timescaledb 2.x
+RUN apt-get update \
+    && apt-get install -y lsb-release wget \
+    && echo "deb https://packagecloud.io/timescale/timescaledb/debian/ $(lsb_release -c -s) main" | tee /etc/apt/sources.list.d/timescaledb.list \
+    && wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | apt-key add - \
+    && apt-get update \
+    && apt-get install -y "timescaledb-2-postgresql-${PG_MAJOR}" \
+    && apt-get remove -y lsb-release wget \
+    && 	rm -fr /tmp/* \
+    && 	rm -rf /var/lib/apt/lists/*
+
 # Install additional extensions
 RUN set -xe; \
 	apt-get update; \
@@ -51,6 +62,12 @@ RUN set -xe; \
 # TODO: Remove --no-deps once https://github.com/pypa/pip/issues/9644 is solved
 	pip3 install --no-deps -r requirements.txt; \
 	rm -rf /var/lib/apt/lists/*;
+
+# Install tools
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl vim procps net-tools dnsutils \
+    &&  rm -fr /tmp/* \
+    &&  rm -rf /var/lib/apt/lists/*
 
 # Change the uid of postgres to 26
 RUN usermod -u 26 postgres
