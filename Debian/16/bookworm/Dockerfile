@@ -39,6 +39,31 @@ RUN set -xe; \
 	rm -fr /tmp/* ; \
 	rm -rf /var/lib/apt/lists/*;
 
+# Install timescaledb 2.x
+RUN apt-get update \
+    && apt-get install -y lsb-release wget \
+    && echo "deb https://packagecloud.io/timescale/timescaledb/debian/ $(lsb_release -c -s) main" | tee /etc/apt/sources.list.d/timescaledb.list \
+    && wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | apt-key add - \
+    && apt-get update \
+    && apt-get install -y "timescaledb-2-postgresql-${PG_MAJOR}" \
+    && apt-get remove -y lsb-release wget \
+    && 	rm -fr /tmp/* \
+    && 	rm -rf /var/lib/apt/lists/*
+
+# Install tools
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends wget unzip curl vim procps net-tools dnsutils \
+    &&  rm -fr /tmp/* \
+    &&  rm -rf /var/lib/apt/lists/*
+
+# Install https://github.com/timescale/pgvectorscale/releases
+RUN cd /tmp \
+  && wget https://github.com/timescale/pgvectorscale/releases/download/0.2.0/pgvectorscale-0.2.0-pg16-amd64.zip \
+  && unzip pgvectorscale-0.2.0-pg16-amd64.zip \
+  && dpkg -i pgvectorscale-postgresql-16_0.2.0-Linux_amd64.deb \
+             pgvectorscale-postgresql-16-dbgsym_0.2.0-Linux_amd64.deb \
+  && rm -f pgvectorscale-*
+
 # Install barman-cloud
 RUN set -xe; \
 	apt-get update; \
