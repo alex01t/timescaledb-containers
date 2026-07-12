@@ -1,4 +1,5 @@
-FROM ghcr.io/cloudnative-pg/postgresql:18.4
+#FROM ghcr.io/cloudnative-pg/postgresql:18.4
+FROM ghcr.io/cloudnative-pg/postgresql:18.4-minimal-trixie
 
 USER root
 
